@@ -1,11 +1,8 @@
-#-*- coding:utf-8 -*-
+import os
 
-# conf.py contains the Email, Password and Blog's url
-# (e.g.) conf.py
-#   EMAIL = 'example@your.email'
-#   PASSWORD = 'YourPassword123'
-#   TargetURL = 'http://example.com'
-from conf import *
+# To use pit with Python 3.X, reffer to below.
+# https://falog.net/python3-pit/
+from pit import Pit
 
 import todoist
 
@@ -60,8 +57,13 @@ def parse_tasks_from_blog (targetURL, keyword, mark):
     return tasks
 
 if __name__ == '__main__':
+    if (not os.environ.get('EDITOR')):
+        os.environ['EDITOR'] = 'vi'
+
+    User_info = Pit.get('todoist', {'require': {'Email':'your todoist\'s email', 'Password':'your todoist\'s password', 'Website':'your website url'}})
+
     keyword = '明日やること'
     mark = '・'
     
-    tasks = parse_tasks_from_blog(TargetURL, keyword, mark)
-    add_task_to_todoist(tasks, EMAIL, PASSWORD)
+    tasks = parse_tasks_from_blog(User_info['Website'], keyword, mark)
+    add_task_to_todoist(tasks, User_info['Email'], User_info['Password'])
