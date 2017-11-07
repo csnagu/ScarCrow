@@ -9,6 +9,9 @@ import todoist
 import urllib.request
 from bs4 import BeautifulSoup
 
+import sqlite3
+import os.path
+
 # This function add some tasks to your todoist.
 # The default added task's date is the next day.  
 # tasks get from parse_tasks_from_blog
@@ -54,7 +57,7 @@ def parse_tasks_from_blog (targetURL, keyword, mark):
             tasks.append(target_task.strip().replace('　', ' '))
         if ('明日やること' in target_task):
             flag = True
-    return tasks
+    return tasks        
 
 if __name__ == '__main__':
     if (not os.environ.get('EDITOR')):
@@ -66,4 +69,29 @@ if __name__ == '__main__':
     mark = '・'
     
     tasks = parse_tasks_from_blog(User_info['Website'], keyword, mark)
-    add_task_to_todoist(tasks, User_info['Email'], User_info['Password'])
+
+    dbname = 'database.db'
+
+    conn = sqlite3.connect(dbname)
+    c = conn.cursor()
+
+    # if (not(os.path.exists(dbname))):
+    create_table = '''create table if not exists latest_task (  id int, 
+                                                                name varchar(64) )'''
+    c.execute(create_table)
+
+    insert_sql = 'insert into latest_task (id, name) values (?,?)'
+    id_num = 1
+    for task_name in tasks:
+        blog_task = (id_num, task_name)
+        c.execute(insert_sql, blog_task)
+        id_num += 1
+    conn.commit()
+
+    select_sql = 'select * from latest_task'
+    for row in c.execute(select_sql):
+        print(row)
+
+    conn.close()
+
+    # add_task_to_todoist(tasks, User_info['Email'], User_info['Password'])
