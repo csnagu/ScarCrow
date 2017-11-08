@@ -58,6 +58,13 @@ def parse_tasks_from_blog (targetURL, keyword, mark):
             flag = True
     return tasks        
 
+def rename_table(source_table, new_table):
+    delete_sql = 'drop table ' + new_table
+    c.execute(delete_sql)
+    rename_sql = 'alter table ' + source_table + ' rename to ' + new_table
+    c.execute(rename_sql)
+    conn.commit()
+
 if __name__ == '__main__':
     if (not os.environ.get('EDITOR')):
         os.environ['EDITOR'] = 'vi'
@@ -68,9 +75,7 @@ if __name__ == '__main__':
     mark = '・'    
     tasks = parse_tasks_from_blog(User_info['Website'], keyword, mark)
 
-    dbname = 'database.db'
-
-    conn = sqlite3.connect(dbname)
+    conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
     # テーブルが存在すれば1を，存在しなければ0を返す
@@ -124,11 +129,13 @@ if __name__ == '__main__':
             add_task_to_todoist(tasks, User_info['Email'], User_info['Password'])
         
         # latest_taskテーブルを削除し，todayテーブルをlatest_taskテーブルにリネームする
-        delete_sql = 'drop table latest_task'
-        c.execute(delete_sql)
-        rename_sql = 'alter table today rename to latest_task'
-        c.execute(rename_sql)
-        conn.commit()
+        # delete_sql = 'drop table latest_task'
+        # c.execute(delete_sql)
+        # rename_sql = 'alter table today rename to latest_task'
+        # c.execute(rename_sql)
+        # conn.commit()
+        rename_table('today', 'latest_task')
 
     conn.close()
+
 
