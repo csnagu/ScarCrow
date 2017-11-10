@@ -1,2 +1,4 @@
 conf.py
 __pycache__
+database.db
+sqltest.py
